@@ -2,15 +2,14 @@
 % given.
 % Function used is called "fmincon" and it requires Optimization Toolbox.
 
-function [x, fval, optimized_rhos] = fmincon_gen(GMM, measurements, ...
+function [x, fval, optimized_rhos] = fmincon_gen(GGB_new, measurements, ...
     selection, num_of_states, qudits)
     optimized_rhos = {};
-
     % The function that is being optimized is in the different MATLAB file.
     % Below there is some parameters that are needed to define so that the
     % optimization function can work.
 
-    x0 = zeros(1, 4^qubits - 1);
+    x0 = zeros(1,((num_of_states)^2)^qudits-1);
     A = []; b = []; Aeq = []; beq = []; lb = []; ub = [];
 
     % The main parameter here is the one that hold the constraints. In this
@@ -24,9 +23,10 @@ function [x, fval, optimized_rhos] = fmincon_gen(GMM, measurements, ...
         'Display', 'off');
     
     [x, fval, ~, ~] = ...
-        fmincon(@(x) opt_function(x, GMM, num_of_states, qudits), ...
+        fmincon(@(x) opt_function(x, GGB_new, num_of_states, qudits), ...
                 x0, A, b, Aeq, beq, lb, ub, ...
-                @(x) CONSTAINT FUNCTION HERE, options);
+                @(x) nlcon_gen(x, measurements, selection, qudits, ...
+                num_of_states), options);
     
     % Making the output function local.
 
@@ -34,20 +34,7 @@ function [x, fval, optimized_rhos] = fmincon_gen(GMM, measurements, ...
         stop = false;
         if isequal(state,'iter')
             optimized_rhos = [optimized_rhos, ... 
-                optimized_rho_gen(x, GMM, num_of_states, qudits)];
+                optimized_rho_gen(x, GGB_new, num_of_states, qudits)];
         end
     end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
